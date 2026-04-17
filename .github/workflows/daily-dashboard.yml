@@ -1,0 +1,33 @@
+name: Reggeli Riport Dashboard
+
+on:
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  generate-dashboard:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - run: pip install -r requirements.txt
+      
+      - run: python generate_dashboard.py
+        env:
+          SP_TENANT_ID: ${{ secrets.SP_TENANT_ID }}
+          SP_CLIENT_ID: ${{ secrets.SP_CLIENT_ID }}
+          SP_CLIENT_SECRET: ${{ secrets.SP_CLIENT_SECRET }}
+      
+      - uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .
